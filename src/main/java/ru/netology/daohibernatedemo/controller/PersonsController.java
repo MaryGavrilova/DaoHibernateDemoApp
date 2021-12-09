@@ -1,12 +1,12 @@
 package ru.netology.daohibernatedemo.controller;
 
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ru.netology.daohibernatedemo.exception.EmptyResultDataException;
 import ru.netology.daohibernatedemo.exception.InvalidCredentials;
 import ru.netology.daohibernatedemo.model.Person;
 import ru.netology.daohibernatedemo.service.PersonsService;
@@ -32,8 +32,8 @@ public class PersonsController {
         return ResponseEntity.badRequest().body(e.getMessage());
     }
 
-    @ExceptionHandler(EmptyResultDataAccessException.class)
-    ResponseEntity<String> handleEmptyResultDataAccessException(EmptyResultDataAccessException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Persons living in such city are not found in database");
+    @ExceptionHandler(EmptyResultDataException.class)
+    ResponseEntity<String> handleEmptyResultDataException(EmptyResultDataException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }
 }
