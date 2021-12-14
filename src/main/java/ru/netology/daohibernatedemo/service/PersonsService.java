@@ -58,7 +58,7 @@ public class PersonsService {
     }
 
     public List<Person> findAllByCityOfLiving(String city) {
-        List<Person> persons = personsRepository.findAllByCityOfLiving(city);
+        List<Person> persons = personsRepository.findPersonsWithCityOfLiving(city);
         if (persons.isEmpty()) {
             throw new EmptyResultDataException("Persons are not found");
         } else {
@@ -67,7 +67,7 @@ public class PersonsService {
     }
 
     public List<Person> findAllByIdentityAgeLessThanOrderByAge(int age) {
-        List<Person> persons = personsRepository.findAllByIdentityAgeLessThanOrderByIdentityAge(age);
+        List<Person> persons = personsRepository.findPersonsWithAgeLessThanOrderByAge(age);
         if (persons.isEmpty()) {
             throw new EmptyResultDataException("Persons are not found");
         } else {
@@ -76,7 +76,7 @@ public class PersonsService {
     }
 
     public List<Person> findAllByIdentityNameAndSurname(String name, String surname) {
-        List<Person> persons = personsRepository.findAllByIdentityNameAndIdentitySurname(name, surname);
+        List<Person> persons = personsRepository.findPersonsWithNameAndSurname(name, surname);
         if (persons.isEmpty()) {
             throw new EmptyResultDataException("Persons are not found");
         } else {
