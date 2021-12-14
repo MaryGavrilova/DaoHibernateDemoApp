@@ -2,17 +2,21 @@ package ru.netology.daohibernatedemo.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 import ru.netology.daohibernatedemo.exception.EmptyResultDataException;
 import ru.netology.daohibernatedemo.exception.InvalidCredentials;
+import ru.netology.daohibernatedemo.model.Identity;
 import ru.netology.daohibernatedemo.model.Person;
 import ru.netology.daohibernatedemo.service.PersonsService;
 
+import javax.validation.ConstraintViolationException;
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 import java.util.List;
 
+@Validated
 @RestController
 public class PersonsController {
 
@@ -22,18 +26,66 @@ public class PersonsController {
         this.personsService = personsService;
     }
 
-    @GetMapping("/persons/by-city")
-    public List<Person> getPersonsByCity(@RequestParam("city") String city) {
-        return personsService.getPersonsByCity(city);
+    //CRUD операции
+    @PostMapping("/persons/create")
+    public ResponseEntity<String> createPerson(@Valid @RequestBody Person person) {
+        return ResponseEntity.status(HttpStatus.OK).body(personsService.createPerson(person) + " created");
     }
 
-    @ExceptionHandler(InvalidCredentials.class)
-    ResponseEntity<String> handleInvalidCredentialsException(InvalidCredentials e) {
-        return ResponseEntity.badRequest().body(e.getMessage());
+    @GetMapping("/persons/read-all")
+    public List<Person> readAllPersons() {
+        return personsService.readAllPersons();
+    }
+
+    @GetMapping("/persons/read-one")
+    public Person readPerson(@RequestParam("name") @NotBlank String name,
+                             @RequestParam("surname") @NotBlank String surname,
+                             @RequestParam("age") @Min(0) Integer age) {
+        return personsService.readPerson(name, surname, age);
+    }
+
+    @PostMapping("/persons/update")
+    public ResponseEntity<String> updatePerson(@Valid @RequestBody Person person) {
+        return ResponseEntity.status(HttpStatus.OK).body(personsService.updatePerson(person) + " updated");
+    }
+
+    @DeleteMapping("/persons/delete")
+    public ResponseEntity<String> deletePerson(@RequestParam("name") @NotBlank String name,
+                                               @RequestParam("surname") @NotBlank String surname,
+                                               @RequestParam("age") @Min(0) Integer age) {
+        personsService.deletePerson(name, surname, age);
+        return ResponseEntity.status(HttpStatus.OK).body("Person with " + new Identity(name, surname, age) + " deleted");
+    }
+
+    //Дополнительные методы
+    @GetMapping("/persons/by-city")
+    public List<Person> findAllByCityOfLiving(@RequestParam("city") @NotBlank String city) {
+        return personsService.findAllByCityOfLiving(city);
+    }
+
+    @GetMapping("/persons/by-age-less-than")
+    public List<Person> findAllByIdentityAgeLessThanOrderByAge(@RequestParam("age") @Min(0) Integer age) {
+        return personsService.findAllByIdentityAgeLessThanOrderByAge(age);
+    }
+
+    @GetMapping("/persons/by-name-and-surname")
+    public List<Person> findAllByIdentityNameAndSurname(@RequestParam("name") @NotBlank String name,
+                                                        @RequestParam("surname") @NotBlank String surname) {
+        return personsService.findAllByIdentityNameAndSurname(name, surname);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    ResponseEntity<String> handleConstraintViolationException(ConstraintViolationException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
 
     @ExceptionHandler(EmptyResultDataException.class)
     ResponseEntity<String> handleEmptyResultDataException(EmptyResultDataException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    }
+
+    @ExceptionHandler(InvalidCredentials.class)
+    ResponseEntity<String> handleInvalidCredentials(InvalidCredentials e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
 }
