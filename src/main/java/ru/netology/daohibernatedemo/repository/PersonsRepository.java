@@ -1,22 +1,23 @@
 package ru.netology.daohibernatedemo.repository;
 
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import ru.netology.daohibernatedemo.model.Identity;
 import ru.netology.daohibernatedemo.model.Person;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
 import java.util.List;
 
 @Repository
-public class PersonsRepository {
+public interface PersonsRepository extends JpaRepository<Person, Identity> {
 
-    @PersistenceContext
-    private EntityManager entityManager;
+    @Query("select p from Person p where p.cityOfLiving = :city")
+    List<Person> findPersonsWithCityOfLiving(@Param("city") String cityOfLiving);
 
-    public List<Person> getPersonsByCity(String city) {
-        TypedQuery<Person> query = entityManager.createQuery("select p from Person p where p.cityOfLiving = :city", Person.class);
-        query.setParameter("city", city);
-        return query.getResultList();
-    }
+    @Query("select p from Person p where p.identity.age < :age order by p.identity.age")
+    List<Person> findPersonsWithAgeLessThanOrderByAge(@Param("age") int age);
+
+    @Query("select p from Person p where p.identity.name = :name and p.identity.surname = :surname")
+    List<Person> findPersonsWithNameAndSurname(@Param("name") String name, @Param("surname") String surname);
 }

@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 @Builder
 @AllArgsConstructor
@@ -14,12 +16,16 @@ import javax.persistence.*;
 @Entity
 @Table(name = "persons")
 public class Person {
+
     @EmbeddedId
+    @Valid
     Identity identity;
 
+    @NotNull
     @Column(nullable = false)
     private String phoneNumber;
 
+    @NotNull
     @Column(nullable = false)
     private String cityOfLiving;
 }
